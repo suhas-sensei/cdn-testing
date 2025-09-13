@@ -131,6 +131,26 @@ const AimProbe = ({ onUpdate }: { onUpdate: (aiming: boolean) => void }) => {
   return null;
 };
 
+
+// Force the internal WebGL buffer to 1280x720 and DPR=1.
+// The canvas will still fill the screen via CSS, but it renders at 720p.
+function Force720pHighPerf() {
+  const { gl } = useThree();
+  useEffect(() => {
+    // exact 720p render buffer
+    gl.setPixelRatio(1);
+    gl.setSize(1280, 720, false);
+
+    // make sure the <canvas> still fills the window (upscaled by the browser)
+    const c = gl.domElement as HTMLCanvasElement;
+    c.style.width = "100vw";
+    c.style.height = "100vh";
+    // optional: let the browser choose the best upscaler
+    c.style.imageRendering = "auto";
+  }, [gl]);
+  return null;
+}
+
 // Left-click shooter that only affects Ghost 1 / Ghost 2
 // FUNCTION TO KILL THE FE GHOST
 const GhostClickShooter = ({
@@ -375,7 +395,7 @@ const App = (): JSX.Element => {
 // DO NOT CHANGE UNNDER THIS AREA ---------------------------------------------------------------------------
     const [activeWeapon, setActiveWeapon] =
     useState<"pistol" | "shotgun">("pistol");
-    const [shotgunFlashTick, setShotgunFlashTick] = useState(0);
+
 
     useEffect(() => {
   window.dispatchEvent(new CustomEvent("hud:weapon", { detail: { weapon: activeWeapon } }));
@@ -1288,7 +1308,6 @@ if (event.key.toLowerCase() === "b") {
         });
 
         setTimeout(() => setXPressed(false), 200);
-        backgroundColor: xPressed;
       }
 
       // EXIT + open-and-keep-open via Q (unchanged logic, now works for both rooms)
@@ -1569,10 +1588,7 @@ if (event.key.toLowerCase() === "b") {
    const handleGunShoot = useCallback(
     
     async (hit: THREE.Intersection, cameraPosition: Vector3): Promise<void> => {
-       if (activeWeapon === "shotgun") {
-  setShotgunFlashTick(t => t + 1);
-  playShot();
-}
+
 
 
 
@@ -2078,13 +2094,26 @@ if (event.key.toLowerCase() === "b") {
       )} */}
 
       <Canvas
-        camera={{
-          fov: 60,
-          position: [400, 1.5, 400],
-          rotation: [0, 0, 0],
-          near: 0.2,
-          far: 1000,
-        }}
+       // ✅ exact 720p buffer + max perf hints
+  dpr={1}
+  gl={{
+    powerPreference: "high-performance", // ask for discrete GPU when available
+    antialias: false,        // cheaper (turn on if you really want smoother edges)
+    alpha: false,            // opaque canvas = faster
+    depth: true,
+    stencil: false,
+    preserveDrawingBuffer: false, // better perf (unless you need to read pixels / screenshots)
+  }}
+  frameloop="always"         // keep rendering (don’t auto-throttle)
+  shadows                    // keep if you use shadows; remove for extra perf
+
+  camera={{
+  fov: 60,
+  position: [400, 1.5, 400],
+  near: 0.2,
+  far: 1000,
+}}
+
         onCreated={({ camera }) => {
           camera.rotation.set(0, 0, 0);
           camera.lookAt(400, 1.5, 399);
@@ -2096,6 +2125,8 @@ if (event.key.toLowerCase() === "b") {
         }}
       >
         {/* Lighting */}
+        <Force720pHighPerf />
+
         <ambientLight intensity={0.2} color="#fff8dc" />
         <LightProximity reach={18} minA={0.06} maxA={0.96} />
         <ExposeCamera />
@@ -2114,8 +2145,10 @@ if (event.key.toLowerCase() === "b") {
           intensity={0.8}
           color="#fff8dc"
           castShadow
-          shadow-mapSize-width={2048}
-          shadow-mapSize-height={2048}
+        shadow-mapSize-width={1024}
+
+shadow-mapSize-height={2048}
+
           shadow-camera-far={100}
           shadow-camera-left={-50}
           shadow-camera-right={50}
