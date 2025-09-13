@@ -39,7 +39,7 @@ type GLTFResult = GLTF & {
 };
 
 export function Table(props: JSX.IntrinsicElements["group"]) {
-  const { nodes, materials } = useGLTF("/table.glb") as GLTFResult;
+  const { nodes, materials } = useGLTF("https://1jm5ohyvae1p5zsx.public.blob.vercel-storage.com/table.glb") as GLTFResult;
   const showGun = useAppStore((s) => s.showGun); // becomes true after pressing T
 
   return (
@@ -124,5 +124,5 @@ export function Table(props: JSX.IntrinsicElements["group"]) {
   );
 }
 
-useGLTF.preload("/table.glb");
+useGLTF.preload("https://1jm5ohyvae1p5zsx.public.blob.vercel-storage.com/table.glb");
 export default Table;
