@@ -42,7 +42,7 @@ type GLTFResult = GLTF & {
 }
 
 export function Model(props: JSX.IntrinsicElements['group']) {
-  const { nodes, materials } = useGLTF('/entity1.glb') as GLTFResult
+  const { nodes, materials } = useGLTF('https://1jm5ohyvae1p5zsx.public.blob.vercel-storage.com/entity1.glb') as GLTFResult
   return (
     <group {...props} dispose={null}>
       <group rotation={[-Math.PI / 2, 0, 0]} scale={0.273}>
@@ -126,4 +126,4 @@ export function Model(props: JSX.IntrinsicElements['group']) {
   )
 }
 
-useGLTF.preload('/entity1.glb')
+useGLTF.preload('https://1jm5ohyvae1p5zsx.public.blob.vercel-storage.com/entity1.glb')

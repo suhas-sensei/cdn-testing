@@ -7,34 +7,53 @@ Source: https://sketchfab.com/3d-models/old-rusty-car-95baa20ebc5d4d2e869f0b549b
 Title: Old Rusty Car
 */
 
-import * as THREE from 'three'
-import React from 'react'
-import { useGLTF } from '@react-three/drei'
-import { GLTF } from 'three-stdlib'
+import * as THREE from "three";
+import React from "react";
+import { useGLTF } from "@react-three/drei";
+import { GLTF } from "three-stdlib";
 
 type GLTFResult = GLTF & {
   nodes: {
-    ['Object006_Material_#294_0']: THREE.Mesh
-    ['Object007_Material_#295_0']: THREE.Mesh
-    ['Plane001_Material_#316_0']: THREE.Mesh
-  }
+    ["Object006_Material_#294_0"]: THREE.Mesh;
+    ["Object007_Material_#295_0"]: THREE.Mesh;
+    ["Plane001_Material_#316_0"]: THREE.Mesh;
+  };
   materials: {
-    Material_294: THREE.MeshStandardMaterial
-    Material_295: THREE.MeshStandardMaterial
-    Material_316: THREE.MeshStandardMaterial
-  }
+    Material_294: THREE.MeshStandardMaterial;
+    Material_295: THREE.MeshStandardMaterial;
+    Material_316: THREE.MeshStandardMaterial;
+  };
   // animations: GLTFAction[]
-}
+};
 
-export function Car1(props: JSX.IntrinsicElements['group']) {
-  const { nodes, materials } = useGLTF('/car1.glb') as GLTFResult
+export function Car1(props: JSX.IntrinsicElements["group"]) {
+  const { nodes, materials } = useGLTF(
+    "https://1jm5ohyvae1p5zsx.public.blob.vercel-storage.com/car1.glb"
+  ) as GLTFResult;
   return (
     <group {...props} dispose={null}>
-      <mesh geometry={nodes['Object006_Material_#294_0'].geometry} material={materials.Material_294} position={[0, -4.76, 0]} rotation={[-Math.PI / 2, 0, 0]} />
-      <mesh geometry={nodes['Object007_Material_#295_0'].geometry} material={materials.Material_295} position={[0, -4.76, 0]} rotation={[-Math.PI / 2, 0, 0]} />
-      <mesh geometry={nodes['Plane001_Material_#316_0'].geometry} material={materials.Material_316} position={[2.13, 0, -46.352]} rotation={[-Math.PI / 2, 0, 0]} />
+      <mesh
+        geometry={nodes["Object006_Material_#294_0"].geometry}
+        material={materials.Material_294}
+        position={[0, -4.76, 0]}
+        rotation={[-Math.PI / 2, 0, 0]}
+      />
+      <mesh
+        geometry={nodes["Object007_Material_#295_0"].geometry}
+        material={materials.Material_295}
+        position={[0, -4.76, 0]}
+        rotation={[-Math.PI / 2, 0, 0]}
+      />
+      <mesh
+        geometry={nodes["Plane001_Material_#316_0"].geometry}
+        material={materials.Material_316}
+        position={[2.13, 0, -46.352]}
+        rotation={[-Math.PI / 2, 0, 0]}
+      />
     </group>
-  )
+  );
 }
 
-useGLTF.preload('/car1.glb')
+useGLTF.preload(
+  "https://1jm5ohyvae1p5zsx.public.blob.vercel-storage.com/car1.glb"
+);

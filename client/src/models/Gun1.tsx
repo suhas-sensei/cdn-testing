@@ -46,7 +46,7 @@ interface ModelProps {
 
 export function Model(props: ModelProps): JSX.Element {
   const group = React.useRef<THREE.Group>(null);
-  const { scene }: GLTF = useGLTF("/gun1.glb");
+  const { scene }: GLTF = useGLTF("https://1jm5ohyvae1p5zsx.public.blob.vercel-storage.com/gun1.glb");
   const clone: THREE.Object3D = React.useMemo(
     () => SkeletonUtils.clone(scene),
     [scene]
@@ -193,4 +193,4 @@ export function Model(props: ModelProps): JSX.Element {
   );
 }
 
-useGLTF.preload("/gun1.glb");
+useGLTF.preload("https://1jm5ohyvae1p5zsx.public.blob.vercel-storage.com/gun1.glb");

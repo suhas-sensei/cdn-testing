@@ -87,7 +87,7 @@ function playOnce(action?: THREE.AnimationAction) {
 
 const Pop = forwardRef<PopHandle, Props>(function Pop({ segments, clipNames, ...props }, ref) {
   const group = useRef<THREE.Group>(null);
-  const { nodes, materials, animations } = useGLTF("/gun1.glb") as GLTFResult;
+  const { nodes, materials, animations } = useGLTF("https://1jm5ohyvae1p5zsx.public.blob.vercel-storage.com/gun1.glb") as GLTFResult;
   const { actions, mixer } = useAnimations(animations, group);
 
   // Wait until the <group> ref is attached so mixer has a valid root
@@ -260,4 +260,4 @@ const Pop = forwardRef<PopHandle, Props>(function Pop({ segments, clipNames, ...
 
 export default Pop;
 
-useGLTF.preload("/gun1.glb");
+useGLTF.preload("https://1jm5ohyvae1p5zsx.public.blob.vercel-storage.com/gun1.glb");

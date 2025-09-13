@@ -402,9 +402,9 @@ const shotSfxRef = useRef<HTMLAudioElement | null>(null);
 const pistolReloadSfxRef = useRef<HTMLAudioElement | null>(null);
 const shotgunReloadSfxRef = useRef<HTMLAudioElement | null>(null);
 
-const playShot = () => playSfx(shotSfxRef, "/audio/shot2.mp3");
-const playPistolReload = () => playSfx(pistolReloadSfxRef, "/audio/pistolshot2.mp3");
-const playShotgunReload = () => playSfx(shotgunReloadSfxRef, "/audio/shotreloadd.mp3");
+const playShot = () => playSfx(shotSfxRef, "https://1jm5ohyvae1p5zsx.public.blob.vercel-storage.com/audio/shot2.mp3");
+const playPistolReload = () => playSfx(pistolReloadSfxRef, "https://1jm5ohyvae1p5zsx.public.blob.vercel-storage.com/audio/pistolshot2.mp3");
+const playShotgunReload = () => playSfx(shotgunReloadSfxRef, "https://1jm5ohyvae1p5zsx.public.blob.vercel-storage.com/audio/shotreloadd.mp3");
 
   // Create a base <audio>, then clone per play so rapid shots can overlap
   const ensureSfx = (
@@ -438,12 +438,12 @@ const playShotgunReload = () => playSfx(shotgunReloadSfxRef, "/audio/shotreloadd
   
 
   const bgTracksRef = useRef<string[]>([
-    "/audio/music1.mp3",
-    "/audio/music2.mp3",
-    "/audio/music3.mp3",
-    "/audio/music4.mp3",
+    "https://1jm5ohyvae1p5zsx.public.blob.vercel-storage.com/audio/music1.mp3",
+    "https://1jm5ohyvae1p5zsx.public.blob.vercel-storage.com/audio/music2.mp3",
+    "https://1jm5ohyvae1p5zsx.public.blob.vercel-storage.com/audio/music3.mp3",
+    "https://1jm5ohyvae1p5zsx.public.blob.vercel-storage.com/audio/muisc4.mp3",
   ]);
-  const longTrack = "/audio/long.mp3";
+  const longTrack = "https://1jm5ohyvae1p5zsx.public.blob.vercel-storage.com/audio/long.mp3";
 const pendingPlayRef = useRef(false);
 const resumeHandlersAttachedRef = useRef(false);
 
