@@ -19,6 +19,7 @@ type Props = {
   faceOffsetZ?: number;
 
   showCollider?: boolean;
+    healthPct?: number;
   onVanish?: () => void;
 };
 
@@ -37,6 +38,7 @@ export default function GhostPatrol5({
 
   showCollider = false,
   onVanish,
+    healthPct = 1,
 }: Props) {
   const group = useRef<THREE.Group>(null);
   const ghostRoot = useRef<THREE.Group>(null);
@@ -78,7 +80,21 @@ export default function GhostPatrol5({
     if (ghostRoot.current) ghostRoot.current.visible = false;
     onVanish?.();
   };
-
+function GhostHitbox({
+  size = [3, 5, 1.5],     // [width, height, depth] — tweak per ghost scale
+  center = [0, 4, 0],
+}: { size?: [number, number, number]; center?: [number, number, number] }) {
+  return (
+    <mesh
+      position={center}
+      visible={false}                 // invisible but raycastable
+      userData={{ isEntity: true }}   // <-- makes hits count as enemy
+    >
+      <boxGeometry args={size} />
+      <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+    </mesh>
+  );
+}
   useFrame((_, dt) => {
     const g = group.current;
     if (!g || vanishedRef.current) return;
@@ -139,10 +155,43 @@ export default function GhostPatrol5({
       }
     }
   });
+function HealthBar({ pct = 1, y = 2.6 }: { pct?: number; y?: number }) {
+  const barRef = React.useRef<THREE.Group>(null);
+
+  // keep the bar facing the camera
+  useFrame(({ camera }) => {
+    if (barRef.current) {
+      barRef.current.quaternion.copy(camera.quaternion);
+    }
+  });
+
+  // clamp
+  const p = Math.max(0, Math.min(1, pct));
+  const W = 1.6;        // total width of the bar
+  const H = 0.12;       // height
+  const innerW = W * p; // red width
+
+  return (
+    <group ref={barRef} position={[0, y, 0]}>
+      {/* background */}
+      <mesh>
+        <planeGeometry args={[W, H]} />
+        <meshBasicMaterial color="black" />
+      </mesh>
+      {/* red foreground (anchor left) */}
+      <mesh position={[(-W / 2) + (innerW / 2), 0, 0.001]}>
+        <planeGeometry args={[innerW, H * 0.8]} />
+        <meshBasicMaterial color="#ff3b3b" />
+      </mesh>
+    </group>
+  );
+}
 
   return (
     // NOTE: no userData.isEntity so this ghost doesn't interfere with AimProbe/F shooting UI
     <group ref={group} position={[spawnX, y, spawnZ]} userData={{ ghostId: 5 }}>
+      
+        <GhostHitbox size={[3, 5, 1.5]} center={[0, 4, 0]} />
       {debug && (
         <mesh position={[0, 0.5, 0]}>
           <boxGeometry args={[0.5, 1, 0.5]} />
