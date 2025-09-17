@@ -4,6 +4,7 @@ import { useStarknetConnect } from "../../dojo/hooks/useStarknetConnect";
 import { useGameData } from "../../dojo/hooks/useGameData";
 import { useInitializePlayer } from "../../dojo/hooks/useInitializePlayer";
 import { useStartGame } from "../../dojo/hooks/useStartGame";
+import { TutorialVideo } from "./TutorialVideo";
 
 type Move = "up" | "down" | "left" | "right";
 
@@ -15,28 +16,42 @@ export function MainMenu(): JSX.Element {
     isLoading: initializing,
     canInitialize,
   } = useInitializePlayer();
+  const { startGame, isLoading: startingGame, canStartGame } = useStartGame();
   const {
-    startGame,
-    isLoading: startingGame,
-    canStartGame,
-  } = useStartGame();
-  const { setConnectionStatus, setLoading, gamePhase, player, startGame: startGameUI } =
-    useAppStore();
+    setConnectionStatus,
+    setLoading,
+    gamePhase,
+    player,
+    startGame: startGameUI,
+  } = useAppStore();
 
   const isConnected = status === "connected";
   const hasPlayerStats = playerStats !== null;
-  const isLoading = isConnecting || playerLoading || initializing || startingGame;
+  const isLoading =
+    isConnecting || playerLoading || initializing || startingGame;
 
   const images = useMemo(
-    () => ["/bk1.jpg", "/bk2.jpg", "/bk3.jpg", "/bk4.jpg", "/bk5.jpg", "/bk6.jpg"],
+    () => [
+      "/bk1.jpg",
+      "/bk2.jpg",
+      "/bk3.jpg",
+      "/bk4.jpg",
+      "/bk5.jpg",
+      "/bk6.jpg",
+    ],
     []
   );
   const [bg, setBg] = useState(0);
   const [dir, setDir] = useState<Move>("up");
+  const [showTutorial, setShowTutorial] = useState(false);
 
   useEffect(() => {
     setConnectionStatus(
-      status === "connected" ? "connected" : isConnecting ? "connecting" : "disconnected"
+      status === "connected"
+        ? "connected"
+        : isConnecting
+        ? "connecting"
+        : "disconnected"
     );
   }, [status, isConnecting, setConnectionStatus]);
 
@@ -52,7 +67,8 @@ export function MainMenu(): JSX.Element {
   }, [images.length]);
 
   const canEnterGame = isConnected && hasPlayerStats && !startingGame;
-  const gameAlreadyActive = gamePhase === GamePhase.ACTIVE || (player as any)?.game_active;
+  const gameAlreadyActive =
+    gamePhase === GamePhase.ACTIVE || (player as any)?.game_active;
 
   const handleWalletConnect = async (): Promise<void> => {
     await handleConnect();
@@ -65,13 +81,19 @@ export function MainMenu(): JSX.Element {
   };
 
   const handleStartOrEnterGame = async (): Promise<void> => {
-    if (gameAlreadyActive) {
-      startGameUI();
-      return;
-    }
+    // Always show the tutorial video first
+    setShowTutorial(true);
+
+    // If chain game is already active, we only need to flip the UI after the video.
+    if (gameAlreadyActive) return;
+
+    // Otherwise, kick off the on-chain start in the background while the video plays.
     if (!canStartGame) return;
-    const res = await startGame();
-    if (res?.success) startGameUI();
+    try {
+      await startGame(); // do NOT call startGameUI here; we do it on video end
+    } catch {
+      // ignore, UI will still flip after video; store hooks already surface errors
+    }
   };
 
   return (
@@ -117,7 +139,9 @@ export function MainMenu(): JSX.Element {
             BLOCKROOMS
           </div>
           <div style={{ opacity: 0.8, marginTop: 4 }}>
-            {address ? `Wallet: ${address.slice(0, 6)}...${address.slice(-4)}` : "Wallet: —"}
+            {address
+              ? `Wallet: ${address.slice(0, 6)}...${address.slice(-4)}`
+              : "Wallet: —"}
           </div>
 
           <div style={{ display: "grid", gap: 12, marginTop: 22 }}>
@@ -180,6 +204,15 @@ export function MainMenu(): JSX.Element {
           </div>
         </div>
       </div>
+      {showTutorial && (
+        <TutorialVideo
+          onEnded={() => {
+            setShowTutorial(false);
+            // Now reveal the game UI
+            startGameUI();
+          }}
+        />
+      )}
     </div>
   );
 }
