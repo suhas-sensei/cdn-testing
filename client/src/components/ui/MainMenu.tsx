@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+
 import useAppStore, { GamePhase } from "../../zustand/store";
 import { useStarknetConnect } from "../../dojo/hooks/useStarknetConnect";
 import { useGameData } from "../../dojo/hooks/useGameData";
@@ -8,7 +9,125 @@ import { TutorialVideo } from "./TutorialVideo";
 
 type Move = "up" | "down" | "left" | "right";
 
+const BGM_SRC = "/audio/mainmenu.mp3";
+
 export function MainMenu(): JSX.Element {
+    // BGM refs/state
+  const bgmRef = useRef<HTMLAudioElement | null>(null);
+  const [bgmReady, setBgmReady] = useState(false);
+  const [bgmPlaying, setBgmPlaying] = useState(false);
+
+  // Prepare and aggressively autoplay on page load
+  useEffect(() => {
+    const a = new Audio(BGM_SRC);
+    a.loop = true;
+    a.preload = "auto";
+    a.volume = 0.6;
+    a.crossOrigin = "anonymous";
+    bgmRef.current = a;
+
+    const onCanPlay = () => setBgmReady(true);
+    a.addEventListener("canplaythrough", onCanPlay);
+
+    let unlocked = false;
+
+    const clearUnlockers = () => {
+      window.removeEventListener("pointerdown", unlock);
+      window.removeEventListener("keydown", unlock);
+      window.removeEventListener("touchstart", unlock);
+      document.removeEventListener("visibilitychange", onVis);
+    };
+
+    const markPlaying = () => {
+      if (!unlocked) {
+        unlocked = true;
+        setBgmPlaying(true);
+        clearUnlockers();
+      }
+    };
+
+    const tryAutoplay = async () => {
+      if (!bgmRef.current) return;
+      try {
+        // Chrome allows muted autoplay; unmute after starting.
+        a.muted = true;
+        await a.play();
+        markPlaying();
+        // Unmute shortly after stable start
+        setTimeout(() => {
+          if (bgmRef.current) bgmRef.current.muted = false;
+        }, 150);
+      } catch {
+        // Autoplay blocked: wait for first user gesture
+      }
+    };
+
+    const unlock = () => {
+      if (!bgmRef.current || unlocked) return;
+      // Start with muted= false here; the gesture should permit audio
+      bgmRef.current.muted = false;
+      bgmRef.current.play().then(markPlaying).catch(() => void 0);
+    };
+
+    const onVis = () => {
+      if (document.visibilityState === "visible" && !unlocked) {
+        tryAutoplay();
+      }
+    };
+
+    // Attempt immediately if visible; otherwise on first visibility
+    if (document.visibilityState === "visible") {
+      void tryAutoplay();
+    } else {
+      document.addEventListener("visibilitychange", onVis);
+    }
+
+    // Fallback unlockers if autoplay is blocked
+    window.addEventListener("pointerdown", unlock, { once: true });
+    window.addEventListener("keydown", unlock, { once: true });
+    window.addEventListener("touchstart", unlock, { once: true });
+
+    return () => {
+      clearUnlockers();
+      a.removeEventListener("canplaythrough", onCanPlay);
+      a.pause();
+      // @ts-ignore
+      bgmRef.current = null;
+    };
+  }, []);
+
+  // Start on first meaningful click to satisfy autoplay policies
+  const ensureBgm = async (): Promise<void> => {
+    if (!bgmRef.current || bgmPlaying === true) return;
+    try {
+      // Some browsers require play() to be directly in a user gesture call chain
+      await bgmRef.current.play();
+      setBgmPlaying(true);
+    } catch {}
+  };
+
+  // Fade out BGM and stop
+  const stopBgmWithFade = (ms: number = 700): void => {
+    const a = bgmRef.current;
+    if (!a) return;
+    const startVol = a.volume;
+    const steps = 14;
+    const step = Math.max(1, Math.floor(ms / steps));
+    let i = 0;
+    const id = setInterval(() => {
+      i++;
+      const v = Math.max(0, startVol * (1 - i / steps));
+      a.volume = v;
+      if (i >= steps) {
+        clearInterval(id);
+        a.pause();
+        a.currentTime = 0;
+        a.volume = startVol;
+        setBgmPlaying(false);
+      }
+    }, step);
+  };
+
   const { status, address, handleConnect, isConnecting } = useStarknetConnect();
   const { playerStats, isLoading: playerLoading, refetch } = useGameData();
   const {
@@ -73,16 +192,23 @@ export function MainMenu(): JSX.Element {
     gamePhase === GamePhase.ACTIVE || (player as any)?.game_active;
 
   const handleWalletConnect = async (): Promise<void> => {
+    await ensureBgm();
     await handleConnect();
     setTimeout(() => refetch(), 1500);
   };
 
+
   const handlePlayerInit = async (): Promise<void> => {
+    await ensureBgm();
     const res = await initializePlayer();
     if (res?.success) setTimeout(() => refetch(), 2000);
   };
 
+
   const handleStartOrEnterGame = async (): Promise<void> => {
+    // Stop menu music before entering the rooms
+    stopBgmWithFade(700);
+
     if (!gameAlreadyActive && canStartGame) {
       try {
         await startGame();
@@ -90,6 +216,7 @@ export function MainMenu(): JSX.Element {
     }
     startGameUI();
   };
+
     
 
   return (
@@ -209,9 +336,9 @@ export function MainMenu(): JSX.Element {
               ENTER THE ROOMS
             </button>
 
-            {/* TUTORIAL — no functionality */}
+                  {/* TUTORIAL — also counts as a user gesture to start BGM */}
             <button
-              onClick={() => {}}
+              onClick={() => { void ensureBgm(); }}
               style={{
                 all: "unset",
                 cursor: "pointer",
@@ -224,9 +351,10 @@ export function MainMenu(): JSX.Element {
               TUTORIAL
             </button>
 
-            {/* EXIT GAME — no functionality */}
+
+            {/* EXIT GAME */}
             <button
-              onClick={() => {}}
+              onClick={() => { void ensureBgm(); /* your exit flow here */ }}
               style={{
                 all: "unset",
                 cursor: "pointer",
@@ -238,6 +366,7 @@ export function MainMenu(): JSX.Element {
             >
               EXIT GAME
             </button>
+
           </div>
         </div>
       </div>
