@@ -14,6 +14,27 @@ type Move = "up" | "down" | "left" | "right";
 const BGM_SRC = "/audio/mainmenu.mp3";
 
 export function MainMenu(): JSX.Element {
+  // Poll refetch until the session flag in store flips to "not active" (or timeout).
+const pollRefetchUntilInactive = async (
+  refetchFn: () => Promise<any>,
+  maxTries = 12,
+  gapMs = 350
+): Promise<void> => {
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+  // read from zustand without re-render dependency
+  const isActive = () => {
+    const s = useAppStore.getState();
+    // treat either UI phase ACTIVE or player.game_active as "active"
+    return s.gamePhase === GamePhase.ACTIVE || Boolean(s.player?.game_active);
+  };
+
+  for (let i = 0; i < maxTries; i++) {
+    await refetchFn();         // ask hooks to reload latest on-chain state
+    await sleep(gapMs);        // let state propagate to store/UI
+    if (!isActive()) return;   // stop as soon as it’s inactive
+  }
+};
+
     // BGM refs/state
   const bgmRef = useRef<HTMLAudioElement | null>(null);
   const [bgmReady, setBgmReady] = useState(false);
@@ -209,19 +230,23 @@ export function MainMenu(): JSX.Element {
   };
 
 
- const handleStartOrEnterGame = async (): Promise<void> => {
+const handleStartOrEnterGame = async (): Promise<void> => {
   // Stop menu music before entering the rooms
   stopBgmWithFade(700);
 
   // If a previous session is still active, end it first (backend “Press B”)
-  // gameAlreadyActive covers phase ACTIVE or player.game_active; canEndGame verifies on-chain session state.
   if (gameAlreadyActive && canEndGame) {
     try {
-      const res = await endGame();
-      // small settle to allow indexer/store to reflect completed session
-      await new Promise((r) => setTimeout(r, 1200));
+      await endGame();
     } catch {
-      // proceed regardless; starting a new session is the goal
+      // ignore; proceed to refresh and start
+    }
+
+    // HARD REFRESH OF FRONTEND STATE: refetch until store no longer marks session active
+    try {
+      await pollRefetchUntilInactive(refetch, 12, 350);
+    } catch {
+      // even if polling fails, still move on
     }
   }
 
@@ -229,12 +254,19 @@ export function MainMenu(): JSX.Element {
   if (canStartGame) {
     try {
       await startGame();
-    } catch {}
+      // One extra refetch burst so HUD shows brand-new session values immediately
+      await refetch();
+      await new Promise((r) => setTimeout(r, 250));
+      await refetch();
+    } catch {
+      // swallow; UI flow continues
+    }
   }
 
   // Enter the 3D scene
   startGameUI();
 };
+
 
 
     
