@@ -32,18 +32,20 @@ export function MainMenu(): JSX.Element {
 
   const images = useMemo(
     () => [
-      "/bk1.jpg",
-      "/bk2.jpg",
-      "/bk3.jpg",
-      "/bk4.jpg",
-      "/bk5.jpg",
-      "/bk6.jpg",
+      "/bk1.png",
+      "/bk2.png",
+      "/bk3.png",
+      "/bk4.png",
+      "/bk5.png",
+      "/bk6.png",
     ],
     []
   );
   const [bg, setBg] = useState(0);
   const [dir, setDir] = useState<Move>("up");
   const [showTutorial, setShowTutorial] = useState(false);
+    const [hovered, setHovered] = useState<number | null>(null);
+
 
   useEffect(() => {
     setConnectionStatus(
@@ -81,20 +83,14 @@ export function MainMenu(): JSX.Element {
   };
 
   const handleStartOrEnterGame = async (): Promise<void> => {
-    // Always show the tutorial video first
-    setShowTutorial(true);
-
-    // If chain game is already active, we only need to flip the UI after the video.
-    if (gameAlreadyActive) return;
-
-    // Otherwise, kick off the on-chain start in the background while the video plays.
-    if (!canStartGame) return;
-    try {
-      await startGame(); // do NOT call startGameUI here; we do it on video end
-    } catch {
-      // ignore, UI will still flip after video; store hooks already surface errors
+    if (!gameAlreadyActive && canStartGame) {
+      try {
+        await startGame();
+      } catch {}
     }
+    startGameUI();
   };
+    
 
   return (
     <div
@@ -103,107 +99,149 @@ export function MainMenu(): JSX.Element {
         inset: 0,
         backgroundImage: `url(${images[bg]})`,
         backgroundSize: "cover",
-        backgroundPosition: "center",
+               backgroundPosition: "right center",
+
       }}
     >
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          background:
-            "linear-gradient(180deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.85) 100%)",
-        }}
-      />
-      <div
+ 
+          <div
         style={{
           position: "relative",
           height: "100%",
-          display: "grid",
-          placeItems: "center",
+          display: "flex",
+          alignItems: "stretch",
+          justifyContent: "flex-start",
         }}
       >
+        {/* left dark fade panel only (no full overlay) */}
         <div
           style={{
-            width: 520,
-            maxWidth: "92vw",
-            border: "2px solid #444",
-            borderRadius: 16,
-            padding: 24,
-            background: "rgba(0,0,0,0.6)",
+            position: "absolute",
+            inset: 0,
+            background:
+              "linear-gradient(90deg, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.75) 18%, rgba(0,0,0,0.55) 32%, rgba(0,0,0,0.0) 55%)",
+            pointerEvents: "none",
+          }}
+        />
+
+        {/* left menu column */}
+        <div
+          style={{
+            position: "relative",
+            zIndex: 1,
+            width: 920,
+            padding: "396px 260px",
+            display: "flex",
+            flexDirection: "column",
+            gap: 18,
             color: "white",
-            fontFamily: "monospace",
-            boxShadow: "0 12px 36px rgba(0,0,0,0.6)",
+            userSelect: "none",
           }}
         >
-          <div style={{ fontSize: 26, letterSpacing: 2, color: "#E1CF48" }}>
-            BLOCKROOMS
-          </div>
-          <div style={{ opacity: 0.8, marginTop: 4 }}>
-            {address
-              ? `Wallet: ${address.slice(0, 6)}...${address.slice(-4)}`
-              : "Wallet: —"}
-          </div>
+          
 
-          <div style={{ display: "grid", gap: 12, marginTop: 22 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            {/* NEW GAME — always clickable */}
             <button
               onClick={handleWalletConnect}
-              disabled={isConnected || isConnecting}
               style={{
-                padding: "12px 16px",
-                border: "2px solid #555",
-                borderRadius: 10,
-                background: isConnected ? "#224422" : "#111",
-                color: isConnected ? "#9AD8AA" : "white",
-                cursor: isConnected ? "default" : "pointer",
+                all: "unset",
+                cursor: "pointer",
+                fontSize: 18,
+                letterSpacing: 1,
+                padding: "2px 0",
               }}
             >
-              1. {isConnected ? "CONNECTED" : "CONNECT WALLET"}
+              <span
+                style={{
+                  background: "#FFFFFF",
+                  color: "#000000",
+                  borderRadius: 8,
+                  padding: "8px 14px",
+                  boxShadow: "0 2px 0 rgba(0,0,0,0.35)",
+                }}
+              >
+                NEW GAME
+              </span>
             </button>
 
+            {/* CREATE CHARACTER — greyed until wallet connected + canInitialize */}
             <button
               onClick={handlePlayerInit}
               disabled={!isConnected || !canInitialize || initializing}
               style={{
-                padding: "12px 16px",
-                border: "2px solid #555",
-                borderRadius: 10,
-                background: canInitialize ? "#111" : "#1a1a1a",
-                color: "white",
-                cursor: canInitialize ? "pointer" : "not-allowed",
+                all: "unset",
+                cursor:
+                  isConnected && canInitialize && !initializing
+                    ? "pointer"
+                    : "not-allowed",
+                fontSize: 18,
+                letterSpacing: 1,
+                padding: "2px 0",
+                color:
+                  isConnected && canInitialize && !initializing
+                    ? "#FFFFFF"
+                    : "rgba(255,255,255,0.45)",
               }}
             >
-              2. INITIALIZE PLAYER
+              CREATE CHARACTER
             </button>
 
+            {/* ENTER THE ROOMS — greyed until flow complete */}
             <button
               onClick={handleStartOrEnterGame}
-              disabled={!isConnected || startingGame}
+              disabled={!isConnected || !hasPlayerStats || startingGame}
               style={{
-                padding: "12px 16px",
-                border: "2px solid #555",
-                borderRadius: 10,
-                background: "#111",
-                color: "white",
-                cursor: "pointer",
+                all: "unset",
+                cursor:
+                  isConnected && hasPlayerStats && !startingGame
+                    ? "pointer"
+                    : "not-allowed",
+                fontSize: 18,
+                letterSpacing: 1,
+                padding: "2px 0",
+                color:
+                  isConnected && hasPlayerStats && !startingGame
+                    ? "#FFFFFF"
+                    : "rgba(255,255,255,0.45)",
               }}
             >
-              {startingGame
-                ? "Starting Game..."
-                : gameAlreadyActive
-                ? "3. ENTER GAME"
-                : canEnterGame
-                ? "3. START GAME"
-                : "3. START GAME (Initialize Player First)"}
+              ENTER THE ROOMS
             </button>
 
-            {isLoading && (
-              <div style={{ marginTop: 10, color: "#ccc", fontSize: 13 }}>
-                🔄 Processing blockchain transaction...
-              </div>
-            )}
+            {/* TUTORIAL — no functionality */}
+            <button
+              onClick={() => {}}
+              style={{
+                all: "unset",
+                cursor: "pointer",
+                fontSize: 18,
+                letterSpacing: 1,
+                padding: "2px 0",
+                color: "#FFFFFF",
+              }}
+            >
+              TUTORIAL
+            </button>
+
+            {/* EXIT GAME — no functionality */}
+            <button
+              onClick={() => {}}
+              style={{
+                all: "unset",
+                cursor: "pointer",
+                fontSize: 18,
+                letterSpacing: 1,
+                padding: "2px 0",
+                color: "#FFFFFF",
+              }}
+            >
+              EXIT GAME
+            </button>
           </div>
         </div>
       </div>
+
       {showTutorial && (
         <TutorialVideo
           onEnded={() => {
