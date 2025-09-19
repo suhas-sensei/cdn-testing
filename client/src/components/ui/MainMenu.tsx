@@ -6,6 +6,8 @@ import { useGameData } from "../../dojo/hooks/useGameData";
 import { useInitializePlayer } from "../../dojo/hooks/useInitializePlayer";
 import { useStartGame } from "../../dojo/hooks/useStartGame";
 import { TutorialVideo } from "./TutorialVideo";
+import { useEndGame } from "../../dojo/hooks/useEndGame";
+
 
 type Move = "up" | "down" | "left" | "right";
 
@@ -136,6 +138,8 @@ export function MainMenu(): JSX.Element {
     canInitialize,
   } = useInitializePlayer();
   const { startGame, isLoading: startingGame, canStartGame } = useStartGame();
+  const { endGame, canEndGame } = useEndGame();
+
   const {
     setConnectionStatus,
     setLoading,
@@ -205,17 +209,33 @@ export function MainMenu(): JSX.Element {
   };
 
 
-  const handleStartOrEnterGame = async (): Promise<void> => {
-    // Stop menu music before entering the rooms
-    stopBgmWithFade(700);
+ const handleStartOrEnterGame = async (): Promise<void> => {
+  // Stop menu music before entering the rooms
+  stopBgmWithFade(700);
 
-    if (!gameAlreadyActive && canStartGame) {
-      try {
-        await startGame();
-      } catch {}
+  // If a previous session is still active, end it first (backend “Press B”)
+  // gameAlreadyActive covers phase ACTIVE or player.game_active; canEndGame verifies on-chain session state.
+  if (gameAlreadyActive && canEndGame) {
+    try {
+      const res = await endGame();
+      // small settle to allow indexer/store to reflect completed session
+      await new Promise((r) => setTimeout(r, 1200));
+    } catch {
+      // proceed regardless; starting a new session is the goal
     }
-    startGameUI();
-  };
+  }
+
+  // Start a fresh session if allowed
+  if (canStartGame) {
+    try {
+      await startGame();
+    } catch {}
+  }
+
+  // Enter the 3D scene
+  startGameUI();
+};
+
 
     
 
