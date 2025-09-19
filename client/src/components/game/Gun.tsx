@@ -148,7 +148,7 @@ const [flashKick, setFlashKick] = React.useState(0);
   // Load sound and bind click
   // IMPORTANT: the handler does not make ammo/reload decisions — shoot() does.
   useEffect(() => {
-    const audio = new Audio("/shot.mp3");
+    const audio = new Audio("/audio/shot.mp3");
     audio.volume = 0.7;
     shootSound.current = audio;
 

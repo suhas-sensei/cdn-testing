@@ -26,7 +26,7 @@ type GLTFResult = GLTF & {
 }
 
 export function Shotgun(props: JSX.IntrinsicElements['group']) {
-  const { nodes, materials } = useGLTF('https://1jm5ohyvae1p5zsx.public.blob.vercel-storage.com/shotgun.glb') as GLTFResult
+  const { nodes, materials } = useGLTF("/shotgun.glb") as GLTFResult
   return (
     <group {...props} dispose={null}>
       <group rotation={[-Math.PI / 2, 0, 0]}>
@@ -55,4 +55,4 @@ export function Shotgun(props: JSX.IntrinsicElements['group']) {
   )
 }
 
-useGLTF.preload('https://1jm5ohyvae1p5zsx.public.blob.vercel-storage.com/shotgun.glb')
+useGLTF.preload("/shotgun.glb")

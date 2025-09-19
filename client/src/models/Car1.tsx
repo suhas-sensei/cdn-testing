@@ -28,7 +28,7 @@ type GLTFResult = GLTF & {
 
 export function Car1(props: JSX.IntrinsicElements["group"]) {
   const { nodes, materials } = useGLTF(
-    "https://1jm5ohyvae1p5zsx.public.blob.vercel-storage.com/car1.glb"
+    "/car1.glb"
   ) as GLTFResult;
   return (
     <group {...props} dispose={null}>
@@ -55,5 +55,5 @@ export function Car1(props: JSX.IntrinsicElements["group"]) {
 }
 
 useGLTF.preload(
-  "https://1jm5ohyvae1p5zsx.public.blob.vercel-storage.com/car1.glb"
+  "/car1.glb"
 );
