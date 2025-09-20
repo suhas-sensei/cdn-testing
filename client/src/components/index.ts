@@ -14,7 +14,7 @@ export { BloodEffect } from "./game/BloodEffect";
 export { BulletHole } from "./game/BulletHole";
 
 // System Components
-export { AudioManager } from "./systems/AudioManager";
+// export { AudioManager } from "./systems/AudioManager";
 export { FirstPersonControls } from "./systems/FirstPersonControls";
 export { EntityCube } from "./game/EntityCube";
 export { HUD } from "./ui/HUD";

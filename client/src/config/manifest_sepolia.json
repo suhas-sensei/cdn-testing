@@ -1,8 +1,8 @@
 {
   "world": {
     "class_hash": "0x13d92333361bb7049c1232c0a5404e2c19082ededc3a73d75cb33fa952adec7",
-    "address": "0x752b8f06d07ee05378c5b57e37cd1271c5562dfd6b48731fee1423028aec178",
-    "seed": "blockrooms10",
+    "address": "0x6eec5002d554dae100cdc846a7dfee48bab680f78b7463658da7ed241e2f2a9",
+    "seed": "blockrooms11",
     "name": "blockrooms",
     "entrypoints": [
       "uuid",
@@ -1328,8 +1328,8 @@
   },
   "contracts": [
     {
-      "address": "0x1107b589cb69926052d3506f3297482b380ac74a7180c76ee3681bcdc128eaa",
-      "class_hash": "0x1a41a6ddd62866505bb1e83b38e9b923003b530169565d27a17fd6e5bf376e1",
+      "address": "0x20ccd706285e4b09d0a95c612e3e2d45f5d0e6684df48c93e68c4a4a7231ccf",
+      "class_hash": "0x2cd77a8fcebd44d4ae58a78d607c90d144ea63500d93d11e8eecf3bc8d01277",
       "abi": [
         {
           "type": "impl",
@@ -1985,6 +1985,12 @@
   "events": [
     {
       "members": [],
+      "class_hash": "0xc841971b2aaf9e0e89d1d119f119298d89ba80953e8a9dcfd568dcf8406063",
+      "tag": "blockrooms-EntityAttacked",
+      "selector": "0x742afe9292d91137a144a1fed14450beed797b547abcf97a06ab1a3d0442491"
+    },
+    {
+      "members": [],
       "class_hash": "0x136969df143f12343dcfe9658a8c4561fd0e620b138bc09d8999e005261d3",
       "tag": "blockrooms-GameCompleted",
       "selector": "0x2555f977bb26694b673a2edda760c9651bbf45c9389efdc30f05cf1083e7676"
@@ -2009,6 +2015,12 @@
     },
     {
       "members": [],
+      "class_hash": "0x13438e509231cb6c546cf0856b5fcadff0c36ebedc48b47e28de9066820e944",
+      "tag": "blockrooms-PlayerMoved",
+      "selector": "0x2090b879e1f3d74c056d028331a541ef77dc2d5424d4fb8805d8f09b19f6124"
+    },
+    {
+      "members": [],
       "class_hash": "0x35a5e7df06bab0c6ea233ced7eab97cac6fae7a3ce1c9d9bc906f70a07fc97e",
       "tag": "blockrooms-RoomCleared",
       "selector": "0x4512355f3651aa56536863983b3af8f0fe32944aabc03d2ae584120efc703d8"
@@ -2024,6 +2036,12 @@
       "class_hash": "0x769479055dd16ef5b895f0d66d1d6ad67e221a6ab63ce7e42689ddfae02795a",
       "tag": "blockrooms-RoomExited",
       "selector": "0x36c698b4dc0a545e854b2ca5e742dffc3afc248ec58ab00f07c46743dd05d67"
+    },
+    {
+      "members": [],
+      "class_hash": "0x289092d5d32a6a2465fd0a6a88b70316710538479ff5045cefd56350dcbb4c2",
+      "tag": "blockrooms-ShardCollected",
+      "selector": "0x1c27f382101c529ac4d15d527a3e653c70877d80bd813fc3092719bfccbe970"
     },
     {
       "members": [],

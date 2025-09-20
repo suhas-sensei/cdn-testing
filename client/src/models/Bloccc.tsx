@@ -2397,7 +2397,7 @@ export function CorridorLights() {
 
 
 export function Model(props: JSX.IntrinsicElements['group']) {
-  const { nodes, materials } = useGLTF('https://1jm5ohyvae1p5zsx.public.blob.vercel-storage.com/bloccc.glb') as GLTFResult
+  const { nodes, materials } = useGLTF("/bloccc.glb") as GLTFResult
   const carpetBump = (__carpetBump ??= makeCarpetBumpTexture(256));
 
   return (
@@ -15929,4 +15929,4 @@ export function Model(props: JSX.IntrinsicElements['group']) {
   )
 }
 
-useGLTF.preload('https://1jm5ohyvae1p5zsx.public.blob.vercel-storage.com/bloccc.glb')
+useGLTF.preload("/bloccc.glb")
